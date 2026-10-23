@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Transaction Details</h1>
+        <p class="subtitle">Recorded transaction information.</p>
+    </div>
+    <a class="button" href="{{ url_for('transactions.edit', transaction_id=transaction._id) }}">Edit transaction</a>
+</div>
+
+<dl class="detail-grid">
+    <dt>Date</dt>
+    <dd>{{ transaction.date|datefmt }}</dd>
+
+    <dt>Type</dt>
+    <dd>{{ transaction.type|type_label }}</dd>
+
+    <dt>Title</dt>
+    <dd>{{ transaction.title }}</dd>
+
+    <dt>Amount</dt>
+    <dd>
+        <span class="amount {% if transaction.type == 'credit' %}credit{% else %}debit{% endif %}">
+            {% if transaction.type == 'credit' %}+{% else %}-{% endif %}{{ transaction.amount|money }}
+        </span>
+    </dd>
+
+    <dt>Category</dt>
+    <dd>{{ transaction.category }}</dd>
+
+    <dt>Description</dt>
+    <dd>{% if transaction.description %}{{ transaction.description }}{% else %}<span class="muted">-</span>{% endif %}</dd>
+
+    <dt>Payment method</dt>
+    <dd>{% if transaction.payment_method %}{{ transaction.payment_method }}{% else %}<span class="muted">-</span>{% endif %}</dd>
+
+    <dt>Reference or notes</dt>
+    <dd>{% if transaction.notes %}{{ transaction.notes }}{% else %}<span class="muted">-</span>{% endif %}</dd>
+</dl>
+
+<div class="detail-actions">
+    <a class="button button-secondary" href="{{ url_for('transactions.index') }}">Back to transactions</a>
+    <form class="inline-form" method="post" action="{{ url_for('transactions.delete', transaction_id=transaction._id) }}" data-confirm="Delete this transaction? This cannot be undone.">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="button button-danger">Delete transaction</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+{% endblock %}

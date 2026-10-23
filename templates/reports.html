@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Reports</h1>
+        <p class="subtitle">Filter your transactions and download a PDF statement.</p>
+    </div>
+</div>
+
+{% if errors %}
+<div class="flash flash-error" role="alert">
+    <strong>Please check the report filters:</strong>
+    <ul class="error-list">
+        {% for error in errors %}<li>{{ error }}</li>{% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<form class="filter-form" method="post" action="{{ url_for('reports.download_pdf') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="field">
+        <label for="start_date">Start date</label>
+        <input type="date" id="start_date" name="start_date" value="{{ filters.start_date }}">
+    </div>
+    <div class="field">
+        <label for="end_date">End date</label>
+        <input type="date" id="end_date" name="end_date" value="{{ filters.end_date }}">
+    </div>
+    <div class="field">
+        <label for="type">Type</label>
+        <select id="type" name="type">
+            <option value="all"{% if filters.type == 'all' %} selected{% endif %}>All</option>
+            <option value="credit"{% if filters.type == 'credit' %} selected{% endif %}>Credit</option>
+            <option value="debit"{% if filters.type == 'debit' %} selected{% endif %}>Debit</option>
+        </select>
+    </div>
+    <div class="field">
+        <label for="category">Category</label>
+        <select id="category" name="category">
+            <option value="all"{% if filters.category == 'all' %} selected{% endif %}>All categories</option>
+            {% for category in categories %}
+            <option value="{{ category }}"{% if filters.category == category %} selected{% endif %}>{{ category }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="field">
+        <label for="q">Keyword</label>
+        <input type="search" id="q" name="q" value="{{ filters.q }}" placeholder="Title or description" maxlength="100">
+    </div>
+    <div class="filter-actions">
+        <button type="submit" class="button">Generate PDF Report</button>
+        <a class="button button-secondary" href="{{ url_for('reports.index') }}">Reset</a>
+    </div>
+</form>
+
+<section class="section">
+    <h2>Matching transactions</h2>
+    {% if errors %}
+    <p class="muted">Fix the filter errors above to see matching totals.</p>
+    {% elif summary and summary.count %}
+    <p class="section-note">{{ summary.count }} transaction{% if summary.count != 1 %}s{% endif %} match the current filters. The PDF includes all matching transactions, not only the first page.</p>
+    <div class="stats-grid">
+        <div class="stat">
+            <span class="stat-label">Total credits</span>
+            <span class="stat-value credit">{{ summary.credits|money }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total debits</span>
+            <span class="stat-value debit">{{ summary.debits|money }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Net balance</span>
+            <span class="stat-value {% if summary.net < 0 %}debit{% else %}credit{% endif %}">{{ summary.net|money }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Transactions</span>
+            <span class="stat-value">{{ summary.count }}</span>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No transactions match the selected filters.</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Transactions</h1>
+        <p class="subtitle">Search, filter and manage your recorded transactions.</p>
+    </div>
+    <a class="button" href="{{ url_for('transactions.create') }}">Add transaction</a>
+</div>
+
+{% if errors %}
+<div class="flash flash-error" role="alert">
+    <strong>Please check the filters:</strong>
+    <ul class="error-list">
+        {% for error in errors %}<li>{{ error }}</li>{% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<form class="filter-form" method="get" action="{{ url_for('transactions.index') }}">
+    <div class="field">
+        <label for="q">Search</label>
+        <input type="search" id="q" name="q" value="{{ filters.q }}" placeholder="Title or description" maxlength="100">
+    </div>
+    <div class="field">
+        <label for="type">Type</label>
+        <select id="type" name="type">
+            <option value="all"{% if filters.type == 'all' %} selected{% endif %}>All</option>
+            <option value="credit"{% if filters.type == 'credit' %} selected{% endif %}>Credit</option>
+            <option value="debit"{% if filters.type == 'debit' %} selected{% endif %}>Debit</option>
+        </select>
+    </div>
+    <div class="field">
+        <label for="category">Category</label>
+        <select id="category" name="category">
+            <option value="all"{% if filters.category == 'all' %} selected{% endif %}>All categories</option>
+            {% for category in categories %}
+            <option value="{{ category }}"{% if filters.category == category %} selected{% endif %}>{{ category }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="field">
+        <label for="start_date">From date</label>
+        <input type="date" id="start_date" name="start_date" value="{{ filters.start_date }}">
+    </div>
+    <div class="field">
+        <label for="end_date">To date</label>
+        <input type="date" id="end_date" name="end_date" value="{{ filters.end_date }}">
+    </div>
+    <div class="field">
+        <label for="sort">Sort by date</label>
+        <select id="sort" name="sort">
+            <option value="date_desc"{% if filters.sort == 'date_desc' %} selected{% endif %}>Newest first</option>
+            <option value="date_asc"{% if filters.sort == 'date_asc' %} selected{% endif %}>Oldest first</option>
+        </select>
+    </div>
+    <div class="filter-actions">
+        <button type="submit" class="button">Apply filters</button>
+        <a class="button button-secondary" href="{{ url_for('transactions.index') }}">Reset</a>
+    </div>
+</form>
+
+<div class="result-meta">
+    <span>
+        {% if pagination.total %}
+            Showing {{ start_index + 1 }}&ndash;{{ start_index + transactions|length }} of {{ pagination.total }} transaction{% if pagination.total != 1 %}s{% endif %}
+        {% else %}
+            0 transactions
+        {% endif %}
+    </span>
+</div>
+
+{% if transactions %}
+<div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th scope="col">S.No.</th>
+                <th scope="col">Date</th>
+                <th scope="col">Type</th>
+                <th scope="col">Title</th>
+                <th scope="col">Description</th>
+                <th scope="col">Category</th>
+                <th scope="col" class="amount-col">Amount</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ start_index + loop.index }}</td>
+                <td class="nowrap">{{ transaction.date|datefmt }}</td>
+                <td>{{ transaction.type|type_label }}</td>
+                <td><a href="{{ url_for('transactions.detail', transaction_id=transaction._id) }}">{{ transaction.title }}</a></td>
+                <td class="description-cell">{% if transaction.description %}{{ transaction.description|truncate(70) }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                <td>{{ transaction.category }}</td>
+                <td class="amount-col">
+                    <span class="amount {% if transaction.type == 'credit' %}credit{% else %}debit{% endif %}">
+                        {% if transaction.type == 'credit' %}+{% else %}-{% endif %}{{ transaction.amount|money }}
+                    </span>
+                </td>
+                <td>
+                    <div class="row-actions">
+                        <a href="{{ url_for('transactions.detail', transaction_id=transaction._id) }}">View</a>
+                        <a href="{{ url_for('transactions.edit', transaction_id=transaction._id) }}">Edit</a>
+                        <form class="inline-form" method="post" action="{{ url_for('transactions.delete', transaction_id=transaction._id) }}" data-confirm="Delete this transaction? This cannot be undone.">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="link-button link-danger">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if pagination.pages > 1 %}
+<nav class="pagination" aria-label="Transaction pages">
+    {% if pagination.has_prev %}
+    <a href="{{ pagination.prev_url }}" rel="prev">Previous</a>
+    {% else %}
+    <span class="disabled">Previous</span>
+    {% endif %}
+    {% for item in pagination.page_items %}
+        {% if item.number == pagination.page %}
+        <span class="current" aria-current="page">{{ item.number }}</span>
+        {% else %}
+        <a href="{{ item.url }}">{{ item.number }}</a>
+        {% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+    <a href="{{ pagination.next_url }}" rel="next">Next</a>
+    {% else %}
+    <span class="disabled">Next</span>
+    {% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    {% if has_filters %}
+    <p>No transactions match the current filters.</p>
+    <a class="button button-secondary" href="{{ url_for('transactions.index') }}">Clear filters</a>
+    {% else %}
+    <p>No transactions recorded yet.</p>
+    <a class="button" href="{{ url_for('transactions.create') }}">Record your first transaction</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+{% endblock %}

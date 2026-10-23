@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Dashboard</h1>
+        <p class="subtitle">A summary of the transactions you have recorded.</p>
+    </div>
+    <a class="button" href="{{ url_for('transactions.create') }}">Add transaction</a>
+</div>
+
+{% if not has_data %}
+<div class="empty-state">
+    <p>No transactions recorded yet.</p>
+    <a class="button" href="{{ url_for('transactions.create') }}">Record your first transaction</a>
+</div>
+{% else %}
+<section class="section">
+    <h2>All time</h2>
+    <div class="stats-grid">
+        <div class="stat">
+            <span class="stat-label">Total credits</span>
+            <span class="stat-value credit">{{ overall.credits|money }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total debits</span>
+            <span class="stat-value debit">{{ overall.debits|money }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Net balance</span>
+            <span class="stat-value {% if overall.net < 0 %}debit{% else %}credit{% endif %}">{{ overall.net|money }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Transactions</span>
+            <span class="stat-value">{{ overall.count }}</span>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <h2>{{ month_name }}</h2>
+    <div class="stats-grid stats-grid-3">
+        <div class="stat">
+            <span class="stat-label">Credits this month</span>
+            <span class="stat-value credit">{{ monthly.credits|money }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Debits this month</span>
+            <span class="stat-value debit">{{ monthly.debits|money }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Net this month</span>
+            <span class="stat-value {% if monthly.net < 0 %}debit{% else %}credit{% endif %}">{{ monthly.net|money }}</span>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <h2>Monthly trend</h2>
+    <p class="section-note">Credits and debits for the last six calendar months.</p>
+    <div class="chart-wrap chart-trend">
+        <canvas id="trendChart" role="img" aria-label="Monthly credits and debits chart"></canvas>
+    </div>
+</section>
+
+<section class="section">
+    <h2>Debit spending by category</h2>
+    <p class="section-note">All recorded debit transactions.</p>
+    {% if charts.categories.labels %}
+    <div class="chart-wrap chart-category">
+        <canvas id="categoryChart" role="img" aria-label="Debit spending by category chart"></canvas>
+    </div>
+    {% else %}
+    <p class="muted">No debit transactions recorded yet.</p>
+    {% endif %}
+</section>
+
+<section class="section">
+    <div class="section-head">
+        <h2>Recent transactions</h2>
+        <a href="{{ url_for('transactions.index') }}">View all transactions</a>
+    </div>
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Type</th>
+                    <th scope="col" class="amount-col">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in recent %}
+                <tr>
+                    <td class="nowrap">{{ transaction.date|datefmt }}</td>
+                    <td><a href="{{ url_for('transactions.detail', transaction_id=transaction._id) }}">{{ transaction.title }}</a></td>
+                    <td>{{ transaction.category }}</td>
+                    <td>{{ transaction.type|type_label }}</td>
+                    <td class="amount-col">
+                        <span class="amount {% if transaction.type == 'credit' %}credit{% else %}debit{% endif %}">
+                            {% if transaction.type == 'credit' %}+{% else %}-{% endif %}{{ transaction.amount|money }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<div id="dashboard-charts" data-charts="{{ charts|tojson|forceescape }}" hidden></div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if has_data %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+{% endif %}
+<script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+{% endblock %}

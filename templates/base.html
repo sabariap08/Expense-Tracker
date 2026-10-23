@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if page_title %}{{ page_title }} &middot; {% endif %}Expense Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="{{ url_for('dashboard.index') }}">Expense Tracker</a>
+            {% if session.get('authenticated') %}
+            {% set endpoint = request.endpoint or '' %}
+            <nav class="main-nav" aria-label="Main navigation">
+                <a href="{{ url_for('dashboard.index') }}"{% if endpoint == 'dashboard.index' %} class="active" aria-current="page"{% endif %}>Dashboard</a>
+                <a href="{{ url_for('transactions.index') }}"{% if endpoint.startswith('transactions.') and endpoint != 'transactions.create' %} class="active" aria-current="page"{% endif %}>Transactions</a>
+                <a href="{{ url_for('transactions.create') }}"{% if endpoint == 'transactions.create' %} class="active" aria-current="page"{% endif %}>Add Transaction</a>
+                <a href="{{ url_for('reports.index') }}"{% if endpoint.startswith('reports.') %} class="active" aria-current="page"{% endif %}>Reports</a>
+                <form class="logout-form" method="post" action="{{ url_for('auth.logout') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="nav-link-button">Logout</button>
+                </form>
+            </nav>
+            {% endif %}
+        </div>
+    </header>
+
+    <main class="page">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-list">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}" role="{% if category == 'error' %}alert{% else %}status{% endif %}">{{ message }}</div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            Expense Tracker &middot; Personal records only. Balances are calculated from transactions recorded in this app, not from a bank statement.
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

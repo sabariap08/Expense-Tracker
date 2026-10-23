@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="login-wrap">
+    <div class="login-panel">
+        <h1>Sign in</h1>
+        <p class="subtitle">Private access to your expense records.</p>
+
+        {% if error %}
+        <div class="flash flash-error" role="alert">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('auth.login') }}" class="login-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="field">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" value="{{ username }}" autocomplete="username" required autofocus>
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="button button-block">Sign in</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>{% if mode == 'edit' %}Edit Transaction{% else %}Add Transaction{% endif %}</h1>
+        <p class="subtitle">{% if mode == 'edit' %}Update the details of this transaction.{% else %}Record a credit or debit transaction.{% endif %}</p>
+    </div>
+</div>
+
+{% if errors %}
+<div class="flash flash-error" role="alert">
+    <strong>Please correct the following:</strong>
+    <ul class="error-list">
+        {% for field, error in errors.items() %}<li>{{ error }}</li>{% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<form method="post"
+      action="{% if mode == 'edit' %}{{ url_for('transactions.edit', transaction_id=transaction._id) }}{% else %}{{ url_for('transactions.create') }}{% endif %}"
+      class="form-grid">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <fieldset class="field span-2">
+        <legend>Transaction type</legend>
+        <div class="radio-group">
+            <label class="radio-option">
+                <input type="radio" name="type" value="credit"{% if data.type == 'credit' %} checked{% endif %} required>
+                Credit
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="type" value="debit"{% if data.type != 'credit' %} checked{% endif %} required>
+                Debit
+            </label>
+        </div>
+        {% if errors.type %}<p class="field-error">{{ errors.type }}</p>{% endif %}
+    </fieldset>
+
+    <div class="field span-2">
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" value="{{ data.title }}" maxlength="120" required>
+        {% if errors.title %}<p class="field-error">{{ errors.title }}</p>{% endif %}
+    </div>
+
+    <div class="field">
+        <label for="amount">Amount</label>
+        <input type="number" id="amount" name="amount" value="{{ data.amount }}" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" required>
+        {% if errors.amount %}<p class="field-error">{{ errors.amount }}</p>{% endif %}
+    </div>
+
+    <div class="field">
+        <label for="date">Date</label>
+        <input type="date" id="date" name="date" value="{{ data.date }}" min="1900-01-01" max="2100-12-31" required>
+        {% if errors.date %}<p class="field-error">{{ errors.date }}</p>{% endif %}
+    </div>
+
+    <div class="field">
+        <label for="category">Category</label>
+        <select id="category" name="category" required>
+            <option value="">Select a category</option>
+            {% for category in categories %}
+            <option value="{{ category }}"{% if data.category == category %} selected{% endif %}>{{ category }}</option>
+            {% endfor %}
+        </select>
+        {% if errors.category %}<p class="field-error">{{ errors.category }}</p>{% endif %}
+    </div>
+
+    <div class="field">
+        <label for="payment_method">Payment method <span class="optional">(optional)</span></label>
+        <input type="text" id="payment_method" name="payment_method" value="{{ data.payment_method }}" maxlength="80" placeholder="e.g. UPI, Card, Bank transfer">
+        {% if errors.payment_method %}<p class="field-error">{{ errors.payment_method }}</p>{% endif %}
+    </div>
+
+    <div class="field span-2">
+        <label for="description">Description <span class="optional">(optional)</span></label>
+        <textarea id="description" name="description" rows="3" maxlength="1000">{{ data.description }}</textarea>
+        {% if errors.description %}<p class="field-error">{{ errors.description }}</p>{% endif %}
+    </div>
+
+    <div class="field span-2">
+        <label for="notes">Reference or notes <span class="optional">(optional)</span></label>
+        <textarea id="notes" name="notes" rows="2" maxlength="500">{{ data.notes }}</textarea>
+        {% if errors.notes %}<p class="field-error">{{ errors.notes }}</p>{% endif %}
+    </div>
+
+    <div class="form-actions span-2">
+        <button type="submit" class="button">{% if mode == 'edit' %}Save changes{% else %}Save transaction{% endif %}</button>
+        <a class="button button-secondary" href="{{ url_for('transactions.index') }}">Cancel</a>
+    </div>
+</form>
+{% endblock %}
