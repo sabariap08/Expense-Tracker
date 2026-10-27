@@ -84,7 +84,7 @@ Create `.env` from `.env.example` and fill in your own values. Never commit `.en
 | `MONGODB_URI` | MongoDB Atlas connection string, including the database user password. |
 | `MONGODB_DATABASE` | Database name. Recommended: `expense_tracker`. |
 | `APP_USERNAME` | Your single login username. |
-| `APP_PASSWORD_HASH` | Werkzeug hash of your password (not plaintext). |
+| `APP_PASSWORD_HASH` | Werkzeug hash of your password (not plaintext). Keep it in single quotes because the hash contains `$` characters. |
 | `FLASK_DEBUG` | `False` in production. |
 | `APP_TIMEZONE` | Calendar timezone for "today" and "current month", e.g. `Asia/Kolkata` or `UTC`. |
 | `SESSION_COOKIE_SECURE` | `True` for HTTPS. Set to `False` only for local plain HTTP development. |
@@ -102,7 +102,7 @@ Generate the password hash from the project root:
 python utils/generate_password_hash.py
 ```
 
-Copy the printed `APP_PASSWORD_HASH=...` line into `.env`. The utility uses Werkzeug's `generate_password_hash`, and login verifies it with `check_password_hash`. Passwords are never stored in the database or written to logs.
+Copy the printed `APP_PASSWORD_HASH='...'` line into `.env`, including the single quotes. The quotes prevent the `$` characters in the hash from being treated as environment-variable expansion. The utility uses Werkzeug's `generate_password_hash`, and login verifies it with `check_password_hash`. Passwords are never stored in the database or written to logs.
 
 > **Local HTTP note:** if you open the app at `http://127.0.0.1:5000` and the login appears to succeed but you are returned to the login page, set `SESSION_COOKIE_SECURE=False` in `.env`. Secure cookies are only sent over HTTPS. Set it back to `True` for deployment.
 

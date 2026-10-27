@@ -12,6 +12,7 @@ from flask import (
     session,
     url_for,
 )
+from flask_cors import CORS
 from flask_wtf.csrf import CSRFError, CSRFProtect
 from pymongo.errors import PyMongoError
 
@@ -55,7 +56,9 @@ def create_app(config_object=None, database=None):
         app.extensions["database"] = database
 
     csrf.init_app(app)
+    CORS(app, supports_credentials=True)
 
+    from api import bp as api_bp
     from auth import bp as auth_bp
     from dashboard import bp as dashboard_bp
     from reports import bp as reports_bp
@@ -65,6 +68,7 @@ def create_app(config_object=None, database=None):
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(transactions_bp)
     app.register_blueprint(reports_bp)
+    app.register_blueprint(api_bp)
 
     app.jinja_env.filters["money"] = format_money
     app.jinja_env.filters["datefmt"] = format_date
@@ -77,6 +81,9 @@ def create_app(config_object=None, database=None):
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("X-Frame-Options", "DENY")
         response.headers.setdefault("Referrer-Policy", "same-origin")
+        if request.endpoint and request.endpoint.startswith("api."):
+            response.headers["Cache-Control"] = "no-store"
+            return response
         if request.endpoint != "static" and response.mimetype == "text/html":
             response.headers["Cache-Control"] = "no-store"
         response.headers.setdefault(

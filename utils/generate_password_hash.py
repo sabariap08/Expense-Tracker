@@ -27,7 +27,7 @@ def main():
 
     print()
     print("Add this line to your .env file:")
-    print(f"APP_PASSWORD_HASH={generate_password_hash(password)}")
+    print(f"APP_PASSWORD_HASH='{generate_password_hash(password)}'")
     return 0
 
 
