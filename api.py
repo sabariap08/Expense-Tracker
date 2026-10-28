@@ -30,6 +30,8 @@ def api_login_required(view):
 
     @wraps(view)
     def wrapped_view(*args, **kwargs):
+        if request.method == "OPTIONS":
+            return view(*args, **kwargs)
         if not session.get("authenticated"):
             return jsonify({"error": "Unauthorized"}), 401
         return view(*args, **kwargs)

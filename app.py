@@ -56,7 +56,7 @@ def create_app(config_object=None, database=None):
         app.extensions["database"] = database
 
     csrf.init_app(app)
-    CORS(app, supports_credentials=True)
+    CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
     from api import bp as api_bp
     from auth import bp as auth_bp
