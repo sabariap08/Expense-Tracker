@@ -11,9 +11,9 @@ This is a native mobile app for the Expense Tracker backend. It uses the REST AP
 
 ## Setup
 1. Start the Flask backend in `D:\Non Academics\Project\Expense Tracker` on `http://127.0.0.1:5000` or your server URL.
-2. Open this folder in Flutter.
-3. Update `lib/config.dart` with your API base URL.
-4. Run `flutter pub get` and `flutter run`.
+2. Open this folder in Flutter (Android Studio/VS Code).
+3. Update `lib/config.dart` with your API base URL. Use `http://10.0.2.2:5000` for Android emulator, `http://127.0.0.1:5000` for iOS simulator/web/desktop.
+4. Run `flutter pub get` and `flutter run`. You can test on Windows desktop, web, or Android emulator.
 
 ## API Endpoints Used
 - POST /api/auth/login
