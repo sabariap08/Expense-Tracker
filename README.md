@@ -83,8 +83,9 @@ Create `.env` from `.env.example` and fill in your own values. Never commit `.en
 | `SECRET_KEY` | Long random value used to sign sessions and CSRF tokens. Generate a new one for production. |
 | `MONGODB_URI` | MongoDB Atlas connection string, including the database user password. |
 | `MONGODB_DATABASE` | Database name. Recommended: `expense_tracker`. |
-| `APP_USERNAME` | Your single login username. |
-| `APP_PASSWORD_HASH` | Werkzeug hash of your password (not plaintext). Keep it in single quotes because the hash contains `$` characters. |
+| `APP_USERNAME` | Your single login username/email. |
+| `APP_PASSWORD` | Plain password for login (easier for testing). OR use `APP_PASSWORD_HASH`. |
+| `APP_PASSWORD_HASH` | Werkzeug hash of your password (more secure). Keep it in single quotes because the hash contains `$` characters. |
 | `FLASK_DEBUG` | `False` in production. |
 | `APP_TIMEZONE` | Calendar timezone for "today" and "current month", e.g. `Asia/Kolkata` or `UTC`. |
 | `SESSION_COOKIE_SECURE` | `True` for HTTPS. Set to `False` only for local plain HTTP development. |

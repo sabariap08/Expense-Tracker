@@ -36,6 +36,7 @@ class Config:
 
     APP_USERNAME = os.environ.get("APP_USERNAME", "").strip()
     APP_PASSWORD_HASH = os.environ.get("APP_PASSWORD_HASH", "").strip()
+    APP_PASSWORD = os.environ.get("APP_PASSWORD", "").strip()
 
     APP_TIMEZONE = os.environ.get("APP_TIMEZONE", "UTC").strip() or "UTC"
 

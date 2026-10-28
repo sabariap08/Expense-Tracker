@@ -74,17 +74,30 @@ def api_login():
 
     configured_username = current_app.config.get("APP_USERNAME", "")
     stored_hash = current_app.config.get("APP_PASSWORD_HASH", "")
+    plain_password = current_app.config.get("APP_PASSWORD", "")
 
-    if not configured_username or not stored_hash:
+    if not configured_username or (not stored_hash and not plain_password):
         return jsonify({"error": "Login is not configured on the server."}), 500
 
-    try:
-        username_ok = username == configured_username
-        password_ok = check_password_hash(stored_hash, password)
-    except (ValueError, TypeError):
-        username_ok = password_ok = False
+    import hmac
 
-    if username_ok and password_ok:
+    username_ok = hmac.compare_digest(username.encode("utf-8"), configured_username.encode("utf-8"))
+    if not username_ok:
+        return jsonify({"error": "Invalid username or password."}), 401
+
+    password_ok = False
+    if stored_hash:
+        try:
+            password_ok = check_password_hash(stored_hash, password)
+        except (ValueError, TypeError):
+            password_ok = False
+    if not password_ok and plain_password:
+        try:
+            password_ok = hmac.compare_digest(password.encode("utf-8"), plain_password.encode("utf-8"))
+        except Exception:
+            password_ok = False
+
+    if password_ok:
         session.clear()
         session.permanent = True
         session["authenticated"] = True
