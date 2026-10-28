@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <header class="card-header">
+    <div>
+      <h1>Settings</h1>
+      <p>Install the app on your device</p>
+    </div>
+  </header>
+  <div class="card-body">
+    <h2>Install as Mobile App (Web App)</h2>
+    <p>Install Expense Tracker as a web-based mobile app on your device. It works offline for cached pages and opens in fullscreen.</p>
+    <button class="button" onclick="installPwa()" id="settings-install-btn">Install App</button>
+    <p style="margin-top:1rem"><small>If the button doesn't appear, your browser may already support it or the prompt isn't available. On Chrome/Edge: Menu → Install Expense Tracker.</small></p>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  let dp;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    dp = e;
+    const b = document.getElementById('settings-install-btn');
+    if (b) b.style.display = 'inline-flex';
+  });
+  function installPwa() {
+    if (!dp) {
+      alert('Use your browser menu: Install app / Add to Home Screen');
+      return;
+    }
+    dp.prompt();
+    dp.userChoice.then(() => { dp = null; });
+  }
+</script>
+{% endblock %}

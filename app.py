@@ -70,6 +70,13 @@ def create_app(config_object=None, database=None):
     app.register_blueprint(reports_bp)
     app.register_blueprint(api_bp)
 
+    from auth import login_required
+
+    @app.route("/settings")
+    @login_required
+    def settings():
+        return render_template("settings.html", page_title="Settings")
+
     app.jinja_env.filters["money"] = format_money
     app.jinja_env.filters["datefmt"] = format_date
     app.jinja_env.filters["type_label"] = lambda value: TYPE_LABELS.get(
